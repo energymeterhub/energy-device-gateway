@@ -1,0 +1,29 @@
+{
+  "version": 4,
+  "wifi": {
+    "ssid": "",
+    "password": ""
+  },
+  "meter": {
+    "type": "IAMMETER_WEM3080T",
+    "host": "",
+    "port": 502,
+    "unit_id": 1,
+    "timeout_ms": 5000
+  },
+  "cloud": {
+    "server": "https://www.iammeter.com",
+    "sn": ""
+  },
+  "destination": {
+    "type": "NONE",
+    "address": "",
+    "sn": ""
+  },
+  "device": {
+    "device_name": "energy_device_gateway"
+  },
+  "auth": {
+    "passwordHash": ""
+  }
+}

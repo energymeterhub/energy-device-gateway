@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-test
+data/*
+!data/config.example.json
+npm-debug.log*
+.DS_Store

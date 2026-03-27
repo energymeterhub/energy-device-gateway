@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Device Gateway</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eff3f4;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-soft: #f7fafb;
+      --line: rgba(17, 32, 42, 0.1);
+      --line-strong: rgba(17, 32, 42, 0.16);
+      --ink: #11202a;
+      --muted: #5a6872;
+      --accent: #0f8b8d;
+      --accent-deep: #0d5f73;
+      --ok: #1f7a5c;
+      --warn: #a0691a;
+      --error: #b13b2f;
+      --ok-soft: rgba(31, 122, 92, 0.1);
+      --warn-soft: rgba(239, 143, 52, 0.12);
+      --error-soft: rgba(177, 59, 47, 0.08);
+      --nav: #0b1327;
+      --nav-line: rgba(255, 255, 255, 0.1);
+      --radius: 18px;
+      --radius-lg: 24px;
+      --shadow: 0 18px 40px rgba(9, 20, 38, 0.08);
+      --heading: "Space Grotesk", sans-serif;
+      --body: "IBM Plex Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 139, 141, 0.05), transparent 24rem),
+        linear-gradient(180deg, #f6f9fa 0%, var(--bg) 100%);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+      font-family: var(--heading);
+      letter-spacing: -0.04em;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--nav-line);
+      background: rgba(11, 19, 39, 0.96);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar-inner {
+      width: min(calc(100% - 24px), 1120px);
+      margin: 0 auto;
+      padding: 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      min-width: 0;
+      flex-shrink: 0;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-mark img {
+      display: block;
+      height: 32px;
+      width: auto;
+    }
+
+    .brand-label {
+      font-family: var(--heading);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .view-menu {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 2px;
+      padding-left: 22px;
+    }
+
+    .view-menu::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 1px;
+      height: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.04));
+      transform: translateY(-50%);
+    }
+
+    .view-tab {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      font-weight: 700;
+      transition:
+        color 0.16s ease,
+        border-color 0.16s ease,
+        background-color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.16s ease;
+    }
+
+    .view-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .view-tab.is-active {
+      color: #fff;
+      border-color: rgba(96, 165, 250, 0.28);
+      background: linear-gradient(180deg, rgba(96, 165, 250, 0.18), rgba(15, 139, 141, 0.12));
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 10px 20px rgba(7, 15, 30, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      justify-content: flex-end;
+    }
+
+    #refresh-now[hidden] {
+      display: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.16s ease, opacity 0.16s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-light {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+      box-shadow: 0 12px 24px rgba(13, 95, 115, 0.18);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(17, 32, 42, 0.05);
+      border: 1px solid rgba(17, 32, 42, 0.1);
+    }
+
+    .btn-danger {
+      color: #fff;
+      background: linear-gradient(135deg, #c54839 0%, #872d25 100%);
+      box-shadow: 0 12px 24px rgba(135, 45, 37, 0.16);
+    }
+
+    .btn.is-busy::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .shell {
+      width: min(calc(100% - 24px), 1120px);
+      margin: 24px auto 0;
+      padding-bottom: 36px;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .page-head h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 0.96;
+    }
+
+    .page-copy {
+      margin: 10px 0 0;
+      max-width: 44rem;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .page-status {
+      min-width: 230px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(17, 32, 42, 0.05);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .page-status.ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+      border-color: rgba(31, 122, 92, 0.14);
+    }
+
+    .page-status.warn {
+      color: var(--warn);
+      background: var(--warn-soft);
+      border-color: rgba(160, 105, 26, 0.16);
+    }
+
+    .page-status.err {
+      color: var(--error);
+      background: var(--error-soft);
+      border-color: rgba(177, 59, 47, 0.16);
+    }
+
+    .tab-panel[hidden] {
+      display: none !important;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .panel-head h2 {
+      font-size: 28px;
+      line-height: 1.02;
+    }
+
+    .panel-head h3 {
+      font-size: 24px;
+      line-height: 1.04;
+    }
+
+    .panel-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .panel-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 44rem;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item {
+      padding: 16px;
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .summary-item em {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: normal;
+      line-height: 1.4;
+    }
+
+    .notice-list,
+    .event-list,
+    .runtime-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .notice {
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .notice strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .notice p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .notice.ok {
+      background: var(--ok-soft);
+      border-color: rgba(31, 122, 92, 0.14);
+    }
+
+    .notice.warn {
+      background: var(--warn-soft);
+      border-color: rgba(160, 105, 26, 0.16);
+    }
+
+    .notice.err {
+      background: var(--error-soft);
+      border-color: rgba(177, 59, 47, 0.16);
+    }
+
+    .chart-wrap {
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(15, 139, 141, 0.12);
+      background: linear-gradient(180deg, rgba(15, 139, 141, 0.08) 0%, rgba(15, 139, 141, 0.01) 100%);
+    }
+
+    .chart-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .chart svg {
+      display: block;
+      width: 100%;
+      height: 220px;
+    }
+
+    .phase-grid,
+    .payload-grid,
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .phase-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .phase {
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .phase strong {
+      font-size: 18px;
+      line-height: 1.08;
+    }
+
+    .phase dl {
+      margin: 12px 0 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 10px;
+    }
+
+    .phase dt {
+      color: var(--muted);
+    }
+
+    .phase dd {
+      margin: 0;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    details.detail-block {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    details.detail-block summary {
+      padding: 16px 18px;
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--heading);
+      font-size: 20px;
+      line-height: 1.08;
+    }
+
+    details.detail-block summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .detail-body {
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .detail-copy {
+      margin: 0;
+      padding: 14px 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .event-item,
+    .runtime-item {
+      padding: 14px 15px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .event-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .event-item small,
+    .runtime-item small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .runtime-item strong {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .runtime-item span {
+      display: block;
+      margin-top: 6px;
+      font-size: 15px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .event-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .event-badge.info {
+      background: rgba(15, 139, 141, 0.12);
+      color: var(--accent-deep);
+    }
+
+    .event-badge.warn {
+      background: rgba(239, 143, 52, 0.14);
+      color: var(--warn);
+    }
+
+    .event-badge.error {
+      background: rgba(177, 59, 47, 0.12);
+      color: var(--error);
+    }
+
+    .payload-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      overflow: hidden;
+    }
+
+    .payload-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .payload-head strong {
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .payload-body {
+      padding: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: rgba(15, 139, 141, 0.42);
+      box-shadow: 0 0 0 0.22rem rgba(15, 139, 141, 0.12);
+    }
+
+    input:disabled,
+    select:disabled,
+    textarea:disabled,
+    input[readonly] {
+      background: #eef2f3;
+      color: #73808d;
+    }
+
+    textarea {
+      min-height: 300px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .form-section + .form-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .field-note,
+    .status {
+      margin-top: 12px;
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.warn { color: var(--warn); }
+    .status.err { color: var(--error); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .footer {
+      padding: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 980px) {
+      .summary-strip,
+      .form-grid,
+      .payload-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .phase-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar-inner,
+      .topbar-left,
+      .page-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .topbar-right {
+        justify-content: flex-start;
+      }
+
+      .view-menu {
+        margin-left: 0;
+        padding-left: 0;
+        gap: 10px;
+      }
+
+      .view-menu::before {
+        display: none;
+      }
+
+      .summary-strip,
+      .form-grid,
+      .payload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <a class="brand" href="/" aria-label="Energy Device Gateway">
+          <span class="brand-mark" aria-hidden="true">
+            <img src="/logo.svg" alt="">
+          </span>
+          <span class="brand-label">Energy Device Gateway</span>
+        </a>
+
+        <nav class="view-menu" aria-label="Workspace sections">
+          <button class="view-tab" id="view-monitor" type="button" data-view="monitor" aria-selected="true">Live</button>
+          <button class="view-tab" id="view-configure" type="button" data-view="configure" aria-selected="false">Settings</button>
+        </nav>
+      </div>
+
+      <div class="topbar-right">
+        <button class="btn btn-light" id="refresh-now" type="button">Refresh</button>
+        <button class="btn btn-light" id="logout-button" type="button">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="page-head">
+      <div>
+        <h1 id="page-title">Loading gateway</h1>
+        <p class="page-copy" id="page-copy">Reading current configuration, live telemetry, and payload state.</p>
+      </div>
+      <div class="page-status" id="page-status">Connecting...</div>
+    </section>
+
+    <section class="stack tab-panel" data-view-panel="monitor">
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Status</div>
+              <h2>Live gateway state</h2>
+              <div class="panel-copy">This is the working surface. Check source health, power, upload state, and the latest gateway warnings before changing anything.</div>
+            </div>
+          </div>
+
+          <div class="summary-strip" id="summary-strip"></div>
+          <div class="notice-list" id="attention-list" style="margin-top: 14px;"></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Trend</div>
+              <h3>Power history</h3>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <div class="chart-meta">
+              <span id="chart-meta-left">Waiting for first reading</span>
+              <span id="chart-meta-right">Recent samples</span>
+            </div>
+            <div class="chart">
+              <svg id="power-chart" viewBox="0 0 640 220" preserveAspectRatio="none" aria-label="Power history chart"></svg>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Reading</div>
+              <h3>Phase detail</h3>
+            </div>
+          </div>
+
+          <div class="phase-grid" id="phase-grid"></div>
+        </div>
+      </article>
+
+      <details class="detail-block">
+        <summary>Recent events</summary>
+        <div class="detail-body">
+          <p class="detail-copy">Newest runtime, auth, config, and upload events from the gateway.</p>
+          <div class="event-list" id="event-list"></div>
+        </div>
+      </details>
+
+      <details class="detail-block">
+        <summary>Runtime snapshot</summary>
+        <div class="detail-body">
+          <p class="detail-copy">Current endpoint, firmware, auth mode, poll timing, and latest error fields.</p>
+          <div class="runtime-list" id="runtime-snapshot"></div>
+        </div>
+      </details>
+
+      <details class="detail-block">
+        <summary>Payload preview</summary>
+        <div class="detail-body">
+          <p class="detail-copy">Use this only when validating downstream integrations or comparing normalized data against the upload payload.</p>
+
+          <div class="payload-grid">
+            <article class="payload-panel">
+              <div class="payload-head">
+                <strong>Normalized meter JSON</strong>
+                <button class="btn btn-secondary" type="button" data-copy-target="normalized-payload">Copy</button>
+              </div>
+              <div class="payload-body">
+                <textarea id="normalized-payload" readonly spellcheck="false"></textarea>
+              </div>
+            </article>
+
+            <article class="payload-panel">
+              <div class="payload-head">
+                <strong>Upload JSON</strong>
+                <button class="btn btn-secondary" type="button" data-copy-target="upload-payload">Copy</button>
+              </div>
+              <div class="payload-body">
+                <textarea id="upload-payload" readonly spellcheck="false"></textarea>
+              </div>
+            </article>
+          </div>
+
+          <div class="status" id="payload-status">Refresh to generate current payloads.</div>
+        </div>
+      </details>
+    </section>
+
+    <section class="stack tab-panel" data-view-panel="configure" hidden>
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Settings</div>
+              <h2>Source and upload</h2>
+              <div class="panel-copy">Only the fields that affect the main workflow stay here. Live refresh will not overwrite your local edits until you save or reset.</div>
+            </div>
+          </div>
+
+          <section class="form-section">
+            <h3>Meter source</h3>
+            <div class="panel-copy" style="margin-top: 8px;">Connection details for the device the gateway reads.</div>
+            <div class="form-grid" style="margin-top: 14px;">
+              <div>
+                <label for="meter-type">Meter type</label>
+                <select id="meter-type">
+                  <option value="IAMMETER_WEM3080T">IAMMETER WEM3080T</option>
+                  <option value="FRONIUS_SUNSPEC">Fronius SunSpec Inverter</option>
+                  <option value="SHELLY_3EM">Shelly Pro 3EM</option>
+                </select>
+              </div>
+              <div>
+                <label for="meter-host">Meter host</label>
+                <input id="meter-host" type="text" placeholder="192.168.1.10">
+              </div>
+              <div>
+                <label for="meter-port">Meter port</label>
+                <input id="meter-port" type="number" min="1" max="65535">
+              </div>
+            </div>
+            <div class="field-note" id="meter-profile-note"></div>
+          </section>
+
+          <section class="form-section">
+            <h3>Upload target</h3>
+            <div class="panel-copy" style="margin-top: 8px;">Choose whether readings stay local, go to IAMMETER Cloud, or post to a compatible local endpoint.</div>
+            <div class="form-grid" style="margin-top: 14px;">
+              <div>
+                <label for="destination-type">Destination</label>
+                <select id="destination-type">
+                  <option value="NONE">Disabled</option>
+                  <option value="IAMMETER_CLOUD">IAMMETER Cloud</option>
+                  <option value="IAMMETER_LOCAL">IAMMETER Local</option>
+                </select>
+              </div>
+              <div>
+                <label for="destination-sn">Upload SN</label>
+                <input id="destination-sn" type="text">
+              </div>
+              <div id="destination-address-wrap">
+                <label for="destination-address">Local destination URL</label>
+                <input id="destination-address" type="text" placeholder="http://192.168.1.50">
+              </div>
+              <div>
+                <label for="cloud-server">Cloud base URL</label>
+                <input id="cloud-server" type="text" placeholder="https://www.iammeter.com">
+              </div>
+            </div>
+            <div class="field-note" id="destination-profile-note"></div>
+          </section>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="save-settings" type="button">Save and validate</button>
+            <button class="btn btn-secondary" id="reset-form" type="button">Reset form</button>
+          </div>
+          <div class="status" id="source-status">Loading configuration...</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Security</div>
+              <h3>Account password</h3>
+              <div class="panel-copy">Username stays fixed as <code>admin</code>. Local passwords are stored as one-way hashes and can be rotated here unless an environment variable is managing access.</div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="auth-username">Username</label>
+              <input id="auth-username" type="text" value="admin" readonly>
+            </div>
+            <div>
+              <label for="password-current">Current password</label>
+              <input id="password-current" type="password" autocomplete="current-password">
+            </div>
+            <div>
+              <label for="password-new">New password</label>
+              <input id="password-new" type="password" autocomplete="new-password">
+            </div>
+            <div>
+              <label for="password-confirm">Confirm new password</label>
+              <input id="password-confirm" type="password" autocomplete="new-password">
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="change-password" type="button">Update password</button>
+          </div>
+          <div class="status" id="password-status">Loading auth settings...</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-body">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Maintenance</div>
+              <h3>Service controls</h3>
+              <div class="panel-copy">Only use these when the process needs a clean restart or the saved configuration must be cleared.</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-secondary" id="restart-button" type="button">Restart gateway</button>
+            <button class="btn btn-danger" id="reset-button" type="button">Factory reset</button>
+          </div>
+          <div class="status" id="ops-status">Ready.</div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">Energy Device Gateway console.</footer>
+  </main>
+
+  <script>
+    const state = {
+      config: null,
+      runtime: null,
+      normalized: null,
+      normalizedError: null,
+      uploadPayload: null,
+      uploadPayloadError: null,
+      history: [],
+      events: [],
+      activeView: loadSavedView(),
+      lastRefreshAt: null,
+      refreshInFlight: false,
+      fetchIssues: [],
+      formDirty: false,
+      lastMeterType: 'IAMMETER_WEM3080T'
+    };
+
+    const defaultPorts = {
+      IAMMETER_WEM3080T: 502,
+      FRONIUS_SUNSPEC: 502,
+      SHELLY_3EM: 80
+    };
+
+    const meterProfiles = {
+      IAMMETER_WEM3080T: 'IAMMETER WEM3080T uses Modbus TCP on port 502 by default.',
+      FRONIUS_SUNSPEC: 'Fronius SunSpec reads over Modbus TCP. Make sure SunSpec access is enabled on the inverter.',
+      SHELLY_3EM: 'Shelly Pro 3EM reads over HTTP RPC. Use the LAN IP and keep port 80 unless the device is customized.'
+    };
+
+    const destinationProfiles = {
+      NONE: 'Local-only mode. Polling continues, but uploads are intentionally disabled.',
+      IAMMETER_CLOUD: 'Cloud mode. Keep a valid upload SN and usually leave the base URL at https://www.iammeter.com.',
+      IAMMETER_LOCAL: 'Local upload mode. A local endpoint URL and upload SN are both required.'
+    };
+
+    const configFieldIds = [
+      'meter-type',
+      'meter-host',
+      'meter-port',
+      'destination-type',
+      'destination-sn',
+      'destination-address',
+      'cloud-server'
+    ];
+
+    function loadSavedView() {
+      try {
+        const saved = window.localStorage.getItem('gateway-view');
+        return ['monitor', 'configure'].includes(saved) ? saved : 'monitor';
+      } catch {
+        return 'monitor';
+      }
+    }
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatNumber(value, suffix = '', digits = 0, maxAbs = Number.POSITIVE_INFINITY) {
+      if (typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > maxAbs) return '-';
+      return `${value.toFixed(digits).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')}${suffix}`;
+    }
+
+    function formatPower(value) {
+      return formatNumber(value, ' W', 0, 1_000_000_000);
+    }
+
+    function formatVoltage(value) {
+      return formatNumber(value, ' V', 1, 10_000);
+    }
+
+    function formatCurrent(value) {
+      return formatNumber(value, ' A', 1, 100_000);
+    }
+
+    function formatEnergy(value) {
+      return formatNumber(value, ' kWh', 2, 1_000_000_000);
+    }
+
+    function formatPowerFactor(value) {
+      return formatNumber(value, '', 2, 1.5);
+    }
+
+    function formatFrequency(value) {
+      return formatNumber(value, ' Hz', 1, 1_000);
+    }
+
+    function formatTime(value) {
+      if (!value) return 'Never';
+      return new Date(value).toLocaleTimeString();
+    }
+
+    function formatDateTime(value) {
+      if (!value) return 'Never';
+      return new Date(value).toLocaleString();
+    }
+
+    function formatRelativeTime(value) {
+      if (!value) return 'Never';
+      const diffSeconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+      if (diffSeconds < 60) return `${diffSeconds}s ago`;
+      const diffMinutes = Math.round(diffSeconds / 60);
+      if (diffMinutes < 60) return `${diffMinutes}m ago`;
+      const diffHours = Math.round(diffMinutes / 60);
+      return `${diffHours}h ago`;
+    }
+
+    function prettyMeterType(type) {
+      return {
+        IAMMETER_WEM3080T: 'IAMMETER WEM3080T',
+        FRONIUS_SUNSPEC: 'Fronius SunSpec',
+        SHELLY_3EM: 'Shelly Pro 3EM'
+      }[type] || type || 'Unknown source';
+    }
+
+    function prettyDestinationType(type) {
+      return {
+        NONE: 'Disabled',
+        IAMMETER_CLOUD: 'IAMMETER Cloud',
+        IAMMETER_LOCAL: 'IAMMETER Local'
+      }[type] || type || 'Unknown destination';
+    }
+
+    function setStatus(id, text, kind = '') {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = text;
+      el.className = `status ${kind}`.trim();
+    }
+
+    function setPageStatus(text, kind = '') {
+      const el = $('page-status');
+      el.textContent = text;
+      el.className = `page-status ${kind}`.trim();
+    }
+
+    function buildSummaryItem(item) {
+      return `
+        <div class="summary-item">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${escapeHtml(item.value)}</strong>
+          <em>${escapeHtml(item.meta)}</em>
+        </div>
+      `;
+    }
+
+    function buildNotice(item) {
+      return `
+        <div class="notice ${escapeHtml(item.tone)}">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.body)}</p>
+        </div>
+      `;
+    }
+
+    function buildRuntimeItem(label, value) {
+      return `
+        <div class="runtime-item">
+          <strong>${escapeHtml(label)}</strong>
+          <span>${escapeHtml(value)}</span>
+        </div>
+      `;
+    }
+
+    function setView(view) {
+      state.activeView = ['monitor', 'configure'].includes(view) ? view : 'monitor';
+      document.querySelectorAll('[data-view]').forEach((button) => {
+        const active = button.dataset.view === state.activeView;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-selected', active ? 'true' : 'false');
+        button.toggleAttribute('aria-current', active);
+      });
+      document.querySelectorAll('[data-view-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.viewPanel !== state.activeView;
+      });
+      $('refresh-now').hidden = state.activeView !== 'monitor';
+      try {
+        window.localStorage.setItem('gateway-view', state.activeView);
+      } catch {}
+    }
+
+    function renderPageHead() {
+      if (!state.runtime) {
+        $('page-title').textContent = 'Loading gateway';
+        $('page-copy').textContent = 'Reading current configuration, live telemetry, and payload state.';
+        setPageStatus('Connecting...', '');
+        return;
+      }
+
+      let title = 'Gateway is ready';
+      let copy = 'Use Live to confirm source health and uploads. Use Settings when the source, upload target, or password needs to change.';
+      let statusText = state.lastRefreshAt ? `Updated ${formatTime(state.lastRefreshAt)}` : 'Connected';
+      let statusKind = 'ok';
+
+      if (state.fetchIssues.length) {
+        title = 'Some data is stale';
+        copy = `The gateway responded, but these sections did not refresh cleanly: ${state.fetchIssues.join(', ')}.`;
+        statusText = `Partial refresh: ${state.fetchIssues.join(', ')}`;
+        statusKind = 'warn';
+      } else if (state.formDirty) {
+        title = 'Settings draft is open';
+        copy = 'Your local edits are preserved. They will not apply until you save them from Settings.';
+        statusText = 'Unsaved changes in Settings';
+        statusKind = 'warn';
+      } else if (!state.runtime.meterConfigured) {
+        title = 'Configure a source to start live reads';
+        copy = 'Add the meter host and port in Settings, then save and validate to start the gateway workflow.';
+        statusText = 'Meter source not configured';
+        statusKind = 'warn';
+      } else if (state.runtime.lastReadingError) {
+        title = 'Source read needs attention';
+        copy = 'The gateway is configured, but the latest meter read failed. Fix connectivity before reviewing payloads or uploads.';
+        statusText = `Read error: ${state.runtime.lastReadingError}`;
+        statusKind = 'err';
+      } else if (state.runtime.destinationType !== 'NONE' && state.runtime.lastUploadError) {
+        title = 'Reads are working, uploads are not';
+        copy = 'Source polling is alive, but the current upload target is failing. Review the destination mode, SN, and URL.';
+        statusText = `Upload error: ${state.runtime.lastUploadError}`;
+        statusKind = 'warn';
+      } else if (state.runtime.destinationType === 'NONE') {
+        title = 'Live reads are active';
+        copy = 'The gateway is monitoring locally. Uploads are intentionally disabled.';
+        statusText = `Last poll ${formatRelativeTime(state.runtime.lastPollAt)}`;
+        statusKind = 'ok';
+      } else {
+        title = 'Gateway is reading and forwarding normally';
+        copy = 'The latest cycle shows healthy reads and a valid upload path.';
+        statusText = state.runtime.lastUploadAt
+          ? `Last upload ${formatRelativeTime(state.runtime.lastUploadAt)}`
+          : `Polls every ${Math.round(state.runtime.pollIntervalMs / 1000)}s`;
+        statusKind = 'ok';
+      }
+
+      $('page-title').textContent = title;
+      $('page-copy').textContent = copy;
+      setPageStatus(statusText, statusKind);
+    }
+
+    function renderSummary() {
+      if (!state.runtime) {
+        $('summary-strip').innerHTML = [
+          { label: 'Source', value: '-', meta: 'Waiting for runtime' },
+          { label: 'Total power', value: '-', meta: 'Waiting for runtime' },
+          { label: 'Upload', value: '-', meta: 'Waiting for runtime' },
+          { label: 'Last poll', value: 'Never', meta: 'Waiting for runtime' }
+        ].map(buildSummaryItem).join('');
+        return;
+      }
+
+      const uploadValue = state.runtime.destinationType === 'NONE'
+        ? 'Disabled'
+        : state.runtime.lastUploadError
+          ? 'Error'
+          : state.runtime.lastUploadAt
+            ? 'OK'
+            : 'Pending';
+
+      $('summary-strip').innerHTML = [
+        {
+          label: 'Source',
+          value: prettyMeterType(state.runtime.sourceType),
+          meta: state.runtime.sourceHost ? `${state.runtime.sourceHost}:${state.runtime.sourcePort}` : 'Not configured'
+        },
+        {
+          label: 'Total power',
+          value: state.normalized ? formatPower(state.normalized.total_power) : '-',
+          meta: state.normalized ? `${state.normalized.valid_phases} valid phases` : (state.normalizedError || 'No live reading')
+        },
+        {
+          label: 'Upload',
+          value: uploadValue,
+          meta: state.runtime.destinationType === 'NONE'
+            ? 'Local only'
+            : (state.runtime.destinationUrl || prettyDestinationType(state.runtime.destinationType))
+        },
+        {
+          label: 'Last poll',
+          value: formatTime(state.runtime.lastPollAt),
+          meta: `Every ${Math.round(state.runtime.pollIntervalMs / 1000)}s`
+        }
+      ].map(buildSummaryItem).join('');
+    }
+
+    function getNotices() {
+      if (!state.runtime) {
+        return [{
+          tone: 'warn',
+          title: 'Waiting for gateway runtime',
+          body: 'The console will populate as soon as the first status response arrives.'
+        }];
+      }
+
+      const items = [];
+
+      if (!state.runtime.meterConfigured) {
+        items.push({
+          tone: 'warn',
+          title: 'Source is not configured',
+          body: 'Set the meter host and save the settings before expecting live reads or payloads.'
+        });
+      }
+
+      if (state.runtime.lastReadingError) {
+        items.push({
+          tone: 'err',
+          title: 'Latest meter read failed',
+          body: state.runtime.lastReadingError
+        });
+      }
+
+      if (state.runtime.destinationType !== 'NONE' && state.runtime.lastUploadError) {
+        items.push({
+          tone: 'err',
+          title: 'Latest upload failed',
+          body: state.runtime.lastUploadError
+        });
+      }
+
+      if (state.formDirty) {
+        items.push({
+          tone: 'warn',
+          title: 'There are unsaved local edits',
+          body: 'Telemetry keeps refreshing, but your draft only applies after Save and validate.'
+        });
+      }
+
+      if (!items.length) {
+        items.push({
+          tone: 'ok',
+          title: 'No active issues',
+          body: state.runtime.destinationType === 'NONE'
+            ? 'Polling is healthy and uploads are intentionally disabled.'
+            : 'Polling and the configured upload route both look healthy.'
+        });
+      }
+
+      return items;
+    }
+
+    function renderNotices() {
+      $('attention-list').innerHTML = getNotices().map(buildNotice).join('');
+    }
+
+    function renderHistoryChart() {
+      const svg = $('power-chart');
+      const history = state.history.slice(0, 36).reverse();
+
+      $('chart-meta-left').textContent = state.normalized
+        ? `${state.normalized.model} | ${state.normalized.protocol}`
+        : 'Waiting for live reading';
+      $('chart-meta-right').textContent = history.length ? `${history.length} recent samples` : 'Recent samples';
+
+      if (!history.length) {
+        svg.innerHTML = `
+          <rect x="0" y="0" width="640" height="220" rx="20" fill="rgba(255,255,255,0.55)"></rect>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#72808b" font-size="16" font-family="IBM Plex Sans">
+            No history available yet
+          </text>
+        `;
+        return;
+      }
+
+      const values = history.map((item) => item.totalPower);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const spread = Math.max(1, max - min);
+      const xForIndex = (index) => 20 + (index * (640 - 40)) / Math.max(1, history.length - 1);
+      const yForValue = (value) => 188 - ((value - min) / spread) * 150;
+      const points = history.map((item, index) => `${xForIndex(index)},${yForValue(item.totalPower)}`).join(' ');
+      const area = `20,188 ${points} 620,188`;
+      const lastPoint = history[history.length - 1];
+      const lastX = xForIndex(history.length - 1);
+      const lastY = yForValue(lastPoint.totalPower);
+      const gridLines = [38, 88, 138, 188].map((y) => `<line x1="20" y1="${y}" x2="620" y2="${y}" stroke="rgba(17,32,42,0.08)" stroke-width="1"></line>`).join('');
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="powerArea" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#0f8b8d" stop-opacity="0.24"></stop>
+            <stop offset="100%" stop-color="#0f8b8d" stop-opacity="0.02"></stop>
+          </linearGradient>
+        </defs>
+        ${gridLines}
+        <polyline points="${area}" fill="url(#powerArea)" stroke="none"></polyline>
+        <polyline points="${points}" fill="none" stroke="#0f8b8d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        <circle cx="${lastX}" cy="${lastY}" r="5" fill="#0f8b8d"></circle>
+      `;
+    }
+
+    function renderPhases() {
+      if (!state.normalized) {
+        $('phase-grid').innerHTML = `
+          <div class="notice warn" style="grid-column: 1 / -1;">
+            <strong>No live phase data yet</strong>
+            <p>${escapeHtml(state.normalizedError || 'Save a working source and refresh to populate phase readings.')}</p>
+          </div>
+        `;
+        return;
+      }
+
+      $('phase-grid').innerHTML = [
+        ['Phase A', state.normalized.phase_a],
+        ['Phase B', state.normalized.phase_b],
+        ['Phase C', state.normalized.phase_c]
+      ].map(([name, phase]) => `
+        <article class="phase">
+          <strong>${escapeHtml(name)}</strong>
+          <dl>
+            <dt>Voltage</dt><dd>${formatVoltage(phase.voltage)}</dd>
+            <dt>Current</dt><dd>${formatCurrent(phase.current)}</dd>
+            <dt>Power</dt><dd>${formatPower(phase.active_power)}</dd>
+            <dt>Forward</dt><dd>${formatEnergy(phase.forward_energy)}</dd>
+            <dt>Reverse</dt><dd>${formatEnergy(phase.reverse_energy)}</dd>
+            <dt>PF</dt><dd>${formatPowerFactor(phase.power_factor)}</dd>
+          </dl>
+        </article>
+      `).join('');
+    }
+
+    function renderEvents() {
+      $('event-list').innerHTML = state.events.length
+        ? state.events.slice(0, 6).map((event) => `
+            <div class="event-item">
+              <div class="event-item-header">
+                <span class="event-badge ${escapeHtml(event.level)}">${escapeHtml(event.category)}</span>
+                <small>${escapeHtml(formatDateTime(event.createdAt))}</small>
+              </div>
+              <div>${escapeHtml(event.message)}</div>
+            </div>
+          `).join('')
+        : `
+            <div class="event-item">
+              <div class="event-item-header">
+                <span class="event-badge info">system</span>
+                <small>No events yet</small>
+              </div>
+              <div>The gateway has not recorded runtime events yet.</div>
+            </div>
+          `;
+    }
+
+    function renderRuntimeSnapshot() {
+      if (!state.runtime || !state.config) {
+        $('runtime-snapshot').innerHTML = [
+          buildRuntimeItem('Account', 'Waiting for runtime status'),
+          buildRuntimeItem('Source endpoint', 'Waiting for configuration'),
+          buildRuntimeItem('Destination', 'Waiting for configuration')
+        ].join('');
+        return;
+      }
+
+      const accountMode = state.runtime.authManagedByEnvironment
+        ? `${state.runtime.authUsername} | ${state.runtime.authEnvironmentVariable || 'Environment managed'}`
+        : `${state.runtime.authUsername} | Local hashed password`;
+
+      $('runtime-snapshot').innerHTML = [
+        ['Account', accountMode],
+        ['Firmware', `${state.config.firmware.version} | ${state.config.firmware.build_date} ${state.config.firmware.build_time}`],
+        ['Source endpoint', state.runtime.sourceHost ? `${state.runtime.sourceHost}:${state.runtime.sourcePort}` : 'Not configured'],
+        ['Destination', state.runtime.destinationUrl || (state.runtime.destinationType === 'NONE' ? 'Uploads disabled' : prettyDestinationType(state.runtime.destinationType))],
+        ['Last poll', formatDateTime(state.runtime.lastPollAt)],
+        ['Last upload', formatDateTime(state.runtime.lastUploadAt)],
+        ['Read error', state.runtime.lastReadingError || 'None'],
+        ['Upload error', state.runtime.lastUploadError || 'None']
+      ].map(([label, value]) => buildRuntimeItem(label, value)).join('');
+    }
+
+    function updateDestinationFields() {
+      const destinationType = $('destination-type').value;
+      const isLocal = destinationType === 'IAMMETER_LOCAL';
+      const isCloud = destinationType === 'IAMMETER_CLOUD';
+      const disabled = destinationType === 'NONE';
+
+      $('destination-address-wrap').hidden = !isLocal;
+      $('destination-address').disabled = !isLocal;
+      $('destination-sn').disabled = disabled;
+      $('cloud-server').disabled = !isCloud;
+    }
+
+    function renderConfigNotes() {
+      $('meter-profile-note').textContent = meterProfiles[$('meter-type').value];
+      $('destination-profile-note').textContent = destinationProfiles[$('destination-type').value];
+    }
+
+    function renderSecurityState() {
+      const runtime = state.runtime;
+      const managedByEnvironment = Boolean(runtime && runtime.authManagedByEnvironment);
+      const username = runtime ? runtime.authUsername : 'admin';
+
+      $('auth-username').value = username;
+      $('password-current').disabled = managedByEnvironment;
+      $('password-new').disabled = managedByEnvironment;
+      $('password-confirm').disabled = managedByEnvironment;
+      $('change-password').disabled = managedByEnvironment;
+
+      if (!runtime) {
+        setStatus('password-status', 'Waiting for auth settings...', '');
+        return;
+      }
+
+      if (managedByEnvironment) {
+        setStatus('password-status', `Password is managed by ${runtime.authEnvironmentVariable || 'an environment variable'} and cannot be changed from the UI.`, 'warn');
+        return;
+      }
+
+      setStatus('password-status', 'Username stays fixed as admin. Enter the current password to rotate the stored hash. Use at least 8 characters.', '');
+    }
+
+    function getComparableStoredConfig(config) {
+      return {
+        meter: {
+          type: config.meter.type,
+          host: config.meter.host || '',
+          port: Number(config.meter.port) || defaultPorts[config.meter.type]
+        },
+        destination: {
+          type: config.destination.type,
+          address: config.destination.address || '',
+          sn: config.destination.sn || config.cloud.sn || ''
+        },
+        cloud: {
+          server: config.cloud.server || ''
+        }
+      };
+    }
+
+    function getComparableFormConfig() {
+      return {
+        meter: {
+          type: $('meter-type').value,
+          host: $('meter-host').value.trim(),
+          port: Number($('meter-port').value) || defaultPorts[$('meter-type').value]
+        },
+        destination: {
+          type: $('destination-type').value,
+          address: $('destination-address').value.trim(),
+          sn: $('destination-sn').value.trim()
+        },
+        cloud: {
+          server: $('cloud-server').value.trim()
+        }
+      };
+    }
+
+    function updateFormDirtyState() {
+      if (!state.config) return;
+
+      const current = JSON.stringify(getComparableFormConfig());
+      const stored = JSON.stringify(getComparableStoredConfig(state.config));
+      state.formDirty = current !== stored;
+
+      $('save-settings').disabled = !state.formDirty;
+      $('reset-form').disabled = !state.formDirty;
+
+      if (state.formDirty) {
+        setStatus('source-status', 'Unsaved changes are local only. Save to validate and apply them.', 'warn');
+      } else {
+        setStatus('source-status', 'Settings match the running gateway.', 'ok');
+      }
+
+      renderPageHead();
+      renderNotices();
+    }
+
+    function renderConfig(force = false) {
+      if (!state.config) {
+        setStatus('source-status', 'Waiting for configuration...', '');
+        return;
+      }
+
+      if (!force && state.formDirty) {
+        updateDestinationFields();
+        renderConfigNotes();
+        updateFormDirtyState();
+        return;
+      }
+
+      const config = getComparableStoredConfig(state.config);
+      $('meter-type').value = config.meter.type;
+      $('meter-host').value = config.meter.host;
+      $('meter-port').value = String(config.meter.port);
+      $('destination-type').value = config.destination.type;
+      $('destination-sn').value = config.destination.sn;
+      $('destination-address').value = config.destination.address;
+      $('cloud-server').value = config.cloud.server;
+
+      state.lastMeterType = config.meter.type;
+      state.formDirty = false;
+
+      updateDestinationFields();
+      renderConfigNotes();
+      updateFormDirtyState();
+    }
+
+    function renderPayloads() {
+      $('normalized-payload').value = state.normalized
+        ? JSON.stringify(state.normalized, null, 2)
+        : JSON.stringify({ error: state.normalizedError || 'No live reading available' }, null, 2);
+
+      $('upload-payload').value = state.uploadPayload
+        ? JSON.stringify(state.uploadPayload, null, 2)
+        : JSON.stringify({ error: state.uploadPayloadError || 'No upload payload available' }, null, 2);
+
+      if (state.normalized && state.uploadPayload) {
+        setStatus('payload-status', 'Payloads reflect the latest live read.', 'ok');
+      } else if (state.normalizedError || state.uploadPayloadError) {
+        setStatus('payload-status', state.normalizedError || state.uploadPayloadError, 'warn');
+      } else {
+        setStatus('payload-status', 'Refresh to generate current payloads.', '');
+      }
+    }
+
+    function renderAll(forceConfigSync = false) {
+      setView(state.activeView);
+      renderPageHead();
+      renderSummary();
+      renderNotices();
+      renderHistoryChart();
+      renderPhases();
+      renderEvents();
+      renderRuntimeSnapshot();
+      renderConfig(forceConfigSync);
+      renderSecurityState();
+      renderPayloads();
+    }
+
+    function setRefreshBusy(isBusy) {
+      const button = $('refresh-now');
+      button.disabled = isBusy;
+      button.classList.toggle('is-busy', isBusy);
+      button.textContent = isBusy ? 'Refreshing' : 'Refresh';
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        credentials: 'include',
+        ...options,
+        headers: {
+          ...(options.headers || {})
+        }
+      });
+
+      if (response.status === 401) {
+        window.location.href = '/login';
+        return null;
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      const payload = contentType.includes('application/json') ? await response.json() : await response.text();
+      return { ok: response.ok, payload };
+    }
+
+    function unwrapSettled(result) {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      }
+
+      return {
+        ok: false,
+        payload: {
+          error: result.reason instanceof Error ? result.reason.message : 'Request failed'
+        }
+      };
+    }
+
+    async function refreshAll(forceConfigSync = false) {
+      if (state.refreshInFlight) {
+        return;
+      }
+
+      state.refreshInFlight = true;
+      setRefreshBusy(true);
+
+      try {
+        const results = await Promise.allSettled([
+          api('/api/config'),
+          api('/api/runtime/status'),
+          api('/api/runtime/history'),
+          api('/api/runtime/events'),
+          api('/api/meter/normalized'),
+          api('/api/meter/data')
+        ]);
+
+        const [configRes, runtimeRes, historyRes, eventsRes, normalizedRes, uploadRes] = results.map(unwrapSettled);
+        state.fetchIssues = [];
+
+        if (configRes && configRes.ok && !configRes.payload.error) {
+          state.config = configRes.payload;
+        } else {
+          state.fetchIssues.push('config');
+        }
+
+        if (runtimeRes && runtimeRes.ok && !runtimeRes.payload.error) {
+          state.runtime = runtimeRes.payload;
+        } else {
+          state.fetchIssues.push('runtime');
+        }
+
+        if (historyRes && historyRes.ok && Array.isArray(historyRes.payload)) {
+          state.history = historyRes.payload;
+        } else {
+          state.fetchIssues.push('history');
+        }
+
+        if (eventsRes && eventsRes.ok && Array.isArray(eventsRes.payload)) {
+          state.events = eventsRes.payload;
+        } else {
+          state.fetchIssues.push('events');
+        }
+
+        if (normalizedRes && !normalizedRes.payload.error) {
+          state.normalized = normalizedRes.payload;
+          state.normalizedError = null;
+        } else {
+          state.normalized = null;
+          state.normalizedError = normalizedRes && normalizedRes.payload && normalizedRes.payload.error
+            ? normalizedRes.payload.error
+            : 'Failed to load live reading';
+        }
+
+        if (uploadRes && !uploadRes.payload.error) {
+          state.uploadPayload = uploadRes.payload;
+          state.uploadPayloadError = null;
+        } else {
+          state.uploadPayload = null;
+          state.uploadPayloadError = uploadRes && uploadRes.payload && uploadRes.payload.error
+            ? uploadRes.payload.error
+            : 'Failed to load upload payload';
+        }
+
+        state.lastRefreshAt = new Date().toISOString();
+        renderAll(forceConfigSync);
+      } finally {
+        state.refreshInFlight = false;
+        setRefreshBusy(false);
+      }
+    }
+
+    async function saveSettings() {
+      const payload = {
+        meter: {
+          type: $('meter-type').value,
+          host: $('meter-host').value.trim(),
+          port: Number($('meter-port').value)
+        },
+        destination: {
+          type: $('destination-type').value,
+          address: $('destination-address').value.trim(),
+          sn: $('destination-sn').value.trim()
+        },
+        cloud: {
+          server: $('cloud-server').value.trim(),
+          sn: $('destination-sn').value.trim()
+        }
+      };
+
+      const response = await api('/api/source', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response) {
+        return;
+      }
+
+      if (!response.ok || response.payload.error) {
+        setStatus('source-status', response.payload.error || 'Failed to save settings.', 'err');
+        return;
+      }
+
+      state.formDirty = false;
+      setStatus('source-status', response.payload.message || 'Settings saved.', 'ok');
+      await refreshAll(true);
+      setView('monitor');
+    }
+
+    function resetFormToRuntime() {
+      renderConfig(true);
+      setStatus('source-status', 'Form reset to the live gateway settings.', 'ok');
+    }
+
+    function clearPasswordFields() {
+      $('password-current').value = '';
+      $('password-new').value = '';
+      $('password-confirm').value = '';
+    }
+
+    async function changePassword() {
+      const response = await api('/api/auth/password', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: $('password-current').value,
+          newPassword: $('password-new').value,
+          confirmPassword: $('password-confirm').value
+        })
+      });
+
+      if (!response) {
+        return;
+      }
+
+      if (!response.ok || response.payload.error) {
+        setStatus('password-status', response.payload.error || 'Failed to update password.', 'err');
+        return;
+      }
+
+      clearPasswordFields();
+      setStatus('password-status', response.payload.message || 'Password updated.', 'ok');
+      await refreshAll(true);
+    }
+
+    async function copyPayload(targetId) {
+      const target = $(targetId);
+      if (!target || !target.value.trim()) {
+        setStatus('payload-status', 'Nothing to copy from this panel yet.', 'warn');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(target.value);
+        setStatus('payload-status', `Copied ${targetId === 'normalized-payload' ? 'normalized JSON' : 'upload JSON'}.`, 'ok');
+      } catch {
+        target.focus();
+        target.select();
+        setStatus('payload-status', 'Clipboard access failed. The payload has been selected instead.', 'warn');
+      }
+    }
+
+    async function callOperation(path, statusId, successMessage, confirmationText) {
+      if (confirmationText && !window.confirm(confirmationText)) {
+        return;
+      }
+
+      const response = await api(path, { method: 'POST' });
+      if (!response) {
+        return;
+      }
+
+      if (!response.ok || response.payload.error) {
+        setStatus(statusId, response.payload.error || 'Operation failed.', 'err');
+        return;
+      }
+
+      setStatus(statusId, successMessage, 'ok');
+      if (path === '/api/factory-reset') {
+        clearPasswordFields();
+        if (response.payload && response.payload.setupRequired) {
+          window.location.href = '/login';
+          return;
+        }
+        await refreshAll(true);
+      }
+    }
+
+    async function logout() {
+      await api('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    }
+
+    function handleMeterTypeChange() {
+      const nextType = $('meter-type').value;
+      const currentPort = Number($('meter-port').value);
+      if (!currentPort || currentPort === defaultPorts[state.lastMeterType]) {
+        $('meter-port').value = String(defaultPorts[nextType]);
+      }
+      state.lastMeterType = nextType;
+      renderConfigNotes();
+      updateFormDirtyState();
+    }
+
+    function handleFormChange() {
+      updateDestinationFields();
+      renderConfigNotes();
+      updateFormDirtyState();
+    }
+
+    document.querySelectorAll('[data-view]').forEach((button) => {
+      button.addEventListener('click', () => setView(button.dataset.view));
+    });
+
+    configFieldIds.forEach((id) => {
+      $(id).addEventListener(id === 'meter-type' ? 'change' : 'input', id === 'meter-type' ? handleMeterTypeChange : handleFormChange);
+      if (id !== 'meter-type') {
+        $(id).addEventListener('change', handleFormChange);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const copyTrigger = event.target.closest('[data-copy-target]');
+      if (copyTrigger) {
+        copyPayload(copyTrigger.dataset.copyTarget);
+      }
+    });
+
+    $('save-settings').addEventListener('click', saveSettings);
+    $('reset-form').addEventListener('click', resetFormToRuntime);
+    $('change-password').addEventListener('click', changePassword);
+    $('refresh-now').addEventListener('click', () => refreshAll(false));
+    $('restart-button').addEventListener('click', () => callOperation(
+      '/api/restart',
+      'ops-status',
+      'Restart requested. Reconnect if the process restarts itself.',
+      'Restart the gateway service now?'
+    ));
+    $('reset-button').addEventListener('click', () => callOperation(
+      '/api/factory-reset',
+      'ops-status',
+      'Factory reset requested. The default config has been reloaded.',
+      'Factory reset will clear the saved gateway configuration. Continue?'
+    ));
+    $('logout-button').addEventListener('click', logout);
+
+    setView(state.activeView);
+    renderAll(true);
+    refreshAll(true);
+    setInterval(() => {
+      void refreshAll(false);
+    }, 5000);
+  </script>
+</body>
+</html>

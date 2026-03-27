@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="Energy Device Gateway">
+  <path d="M20 7L29.5 12.5V23.5L20 29L10.5 23.5V12.5L20 7Z" stroke="#60A5FA" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M15.5 15.5V21.5M24.5 15.5V21.5" stroke="#F8FAFC" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M15.5 18.5H24.5" stroke="#F8FAFC" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M20 21.5V25" stroke="#60A5FA" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

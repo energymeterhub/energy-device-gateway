@@ -1,0 +1,28 @@
+{
+  "name": "energy-device-gateway",
+  "version": "0.1.0",
+  "description": "Node.js + TypeScript gateway for IAMMETER, Fronius SunSpec, and Shelly Pro 3EM devices.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "auth:hash": "tsx src/scripts/hash-password.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/static": "^8.3.0",
+    "fastify": "^5.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.3"
+  }
+}
